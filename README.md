@@ -110,6 +110,10 @@ mariadb_port: 3306
 # Specify slow query log
 mariadb_slow_query_log_enabled: false
 mariadb_slow_query_time: "2"
+
+# Override mariadb packages to install
+# default: empty
+custom_mariadb_packages: []
 ```
 
 ## Dependencies
