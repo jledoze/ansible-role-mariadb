@@ -1,0 +1,45 @@
+---
+
+# Upgrade Mariadb
+
+- name: Gather package facts
+  ansible.builtin.package_facts:
+    manager: "auto"
+
+- name: Set mariadb_version fact
+  set_fact:
+    mariadb_version_server: "{{ ansible_facts.packages['mariadb-server'][0].version | regex_search('(?<=:)([0-9]+\\.[0-9]+\\.[0-9]+)') }}"
+
+- name: Set common variables
+  set_fact:
+    mariadb_user: root
+    mariadb_host: localhost
+    mariadb_upgrade_conditions: ansible_os_family == "Debian" and mariadb_version_server is version(mariadb_version, '<')
+
+- name: stop replication MariaDB if condition met
+  community.mysql.mysql_replication:
+    mode: stopslave
+    login_host: "{{ mariadb_host }}"
+    login_user: "{{ mariadb_user }}"
+    config_file: "{{ mariadb_configuration_file }}"
+    login_unix_socket: "{{ mariadb_socket }}"
+  become: yes
+  when: mariadb_upgrade_conditions
+
+- name: Upgrade mariadb
+  ansible.builtin.apt:
+    name: "mariadb-server=1:{{ mariadb_version }}+maria~{{ debian_release[ansible_distribution_release == 'buster' | ternary(0, 1)] }}"
+    update_cache: yes
+  become: true
+  when: mariadb_upgrade_conditions
+  register: upgrade_finish
+
+- name: start replication MariaDB if upgraded
+  community.mysql.mysql_replication:
+    mode: startslave
+    login_host: "{{ mariadb_host }}"
+    login_user: "{{ mariadb_user }}"
+    config_file: "{{ mariadb_configuration_file }}"
+    login_unix_socket: "{{ mariadb_socket }}"
+  become: yes
+  when: mariadb_upgrade_conditions and upgrade_finish is changed
