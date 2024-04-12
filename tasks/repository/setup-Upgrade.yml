@@ -16,7 +16,7 @@
 
 - name: stop replication MariaDB if condition met
   community.mysql.mysql_replication:
-    mode: stopslave
+    mode: stopreplica
     login_host: "{{ mariadb_host }}"
     login_user: "{{ mariadb_user }}"
     config_file: "{{ mariadb_configuration_file }}"
@@ -43,7 +43,7 @@
 
 - name: start replication MariaDB if upgraded
   community.mysql.mysql_replication:
-    mode: startslave
+    mode: startreplica
     login_host: "{{ mariadb_host }}"
     login_user: "{{ mariadb_user }}"
     config_file: "{{ mariadb_configuration_file }}"
