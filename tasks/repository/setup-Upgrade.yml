@@ -1,5 +1,4 @@
 ---
-
 # Upgrade Mariadb
 
 - name: Gather package facts
@@ -25,13 +24,22 @@
   become: yes
   when: mariadb_version_server is version(mariadb_version, '<')
 
-- name: Upgrade mariadb
-  ansible.builtin.apt:
-    name: "mariadb-server=1:{{ mariadb_version }}+maria~{{ debian_release[ansible_distribution_release == 'buster' | ternary(0, 1)] }}"
-    update_cache: yes
+- name: Pin {{ mariadb_packages[0] }} version
+  copy:
+    dest: "/etc/apt/preferences.d/{{ mariadb_packages[0] }}"
+    content: |
+      Package: {{ mariadb_packages[0] }}
+      Pin: version {{ mariadb_version_pin }}
+      Pin-Priority: 1001
   become: true
+  when: mariadb_version_pin
+
+- name: Update mariadb-server package
+  apt:
+    name: mariadb-server
+    state: latest
   when: mariadb_version_server is version(mariadb_version, '<')
-  register: upgrade_finish is changed
+  register: upgrade_finish
 
 - name: start replication MariaDB if upgraded
   community.mysql.mysql_replication:
