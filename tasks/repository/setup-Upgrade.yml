@@ -14,7 +14,6 @@
   set_fact:
     mariadb_user: root
     mariadb_host: localhost
-    mariadb_upgrade_conditions: ansible_os_family == "Debian" and mariadb_version_server is version(mariadb_version, '<')
 
 - name: stop replication MariaDB if condition met
   community.mysql.mysql_replication:
@@ -24,7 +23,7 @@
     config_file: "{{ mariadb_configuration_file }}"
     login_unix_socket: "{{ mariadb_socket }}"
   become: yes
-  when: mariadb_upgrade_conditions
+  when: mariadb_version_server is version(mariadb_version, '<')
 
 - name: Upgrade mariadb
   ansible.builtin.apt:
@@ -32,7 +31,7 @@
     update_cache: yes
   become: true
   when: mariadb_upgrade_conditions
-  register: upgrade_finish
+  register: mariadb_version_server is version(mariadb_version, '<')
 
 - name: start replication MariaDB if upgraded
   community.mysql.mysql_replication:
@@ -42,4 +41,4 @@
     config_file: "{{ mariadb_configuration_file }}"
     login_unix_socket: "{{ mariadb_socket }}"
   become: yes
-  when: mariadb_upgrade_conditions and upgrade_finish is changed
+  when: mariadb_version_server is version(mariadb_version, '<') and upgrade_finish is changed
