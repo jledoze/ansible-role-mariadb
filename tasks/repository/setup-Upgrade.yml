@@ -30,8 +30,8 @@
     name: "mariadb-server=1:{{ mariadb_version }}+maria~{{ debian_release[ansible_distribution_release == 'buster' | ternary(0, 1)] }}"
     update_cache: yes
   become: true
-  when: mariadb_upgrade_conditions
-  register: mariadb_version_server is version(mariadb_version, '<')
+  when: mariadb_version_server is version(mariadb_version, '<')
+  register: upgrade_finish is changed
 
 - name: start replication MariaDB if upgraded
   community.mysql.mysql_replication:
