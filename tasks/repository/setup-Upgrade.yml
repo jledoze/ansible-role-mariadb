@@ -32,7 +32,7 @@
       Pin: version {{ mariadb_version_pin }}
       Pin-Priority: 1001
   become: true
-  when: mariadb_version_pin
+  when: mariadb_version_pin is defined
 
 - name: Update mariadb-server package
   apt:
