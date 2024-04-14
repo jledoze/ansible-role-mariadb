@@ -13,7 +13,7 @@
 
     - name: Mariadb Upgrade
       import_tasks: setup-Upgrade.yml
-      when: ansible_distribution  == "Debian"
+      when: ansible_distribution  == "Debian" and upgradedb is defined
 
     - name: Mariadb Fedora repos
       import_tasks: setup-Fedora.yml
