@@ -33,7 +33,7 @@
 
     - name: Mariadb-server install from Mariadb repository
       package:
-        name: "{{ mariadb_packages }}"
+        name: "{{ custom_mariadb_packages | default(mariadb_packages, true) }}"
         state: present
 
   when: install_from == "mariadb_repository"
@@ -49,7 +49,7 @@
 
   - name: Mariadb install from os repository
     package:
-      name: "{{ mariadb_packages }}"
+      name: "{{ custom_mariadb_packages | default(mariadb_packages, true) }}"
       state: present
 
   - name: setup Mariadb on FreeBSD
